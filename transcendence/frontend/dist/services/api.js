@@ -1,7 +1,21 @@
 export class api {
-    async post(route) {
-        const response = await fetch("api/" + route);
-        const data = await response.json();
-        return data;
+    async customFetch(url, options) {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            console.error("Erreur HTTP:", response.status);
+            return null;
+        }
+        return await response.json();
+    }
+    async post(route, data) {
+        const response = await this.customFetch("/api/" + route, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: data ? JSON.stringify(data) : undefined
+        });
+        return response;
     }
 }
+export const Api = new api();

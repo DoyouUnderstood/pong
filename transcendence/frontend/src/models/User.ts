@@ -9,7 +9,6 @@ export class User implements UserI
     constructor(username: string, password: string, email?: string) {
         this.username = username;
         this.password = password;
-        if (email)
-            this.email = email;
+        this.email = email;
     }
 }

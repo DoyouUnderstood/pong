@@ -17,4 +17,11 @@ export const execute = async (db, sql, params = []) => {
   });
 };
 
-
+export const selectOne = async (db, sql, params = []) => {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if (err) return reject(err);
+      resolve(row); // `null` si aucun résultat
+    });
+  });
+};
