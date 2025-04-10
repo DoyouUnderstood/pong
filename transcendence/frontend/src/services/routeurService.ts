@@ -20,7 +20,6 @@ export class RouterService {
         const route = this.#route.get(path);
         if (!route)
             return; 
-        //verifier que la route est en @@
         window.history.pushState(null, "", path);
         const html = await loadService(route.partial);
         this.#currentRoute?.cleanup?.();

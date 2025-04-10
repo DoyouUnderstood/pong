@@ -11,8 +11,19 @@ export class LoginRoute implements RouteI
     async setup(container: HTMLElement): Promise<void> {
         console.log("Page login affichée");
         this.eventlogin(container);
+        this.loginErrorListener(container);
     }
-
+    
+    private loginErrorListener(container: HTMLElement)
+    {
+        eventBus.register("error:login", (message: string) => {
+            console.log(message);
+            const errorDiv = container.querySelector("#error-msg") as HTMLElement;
+            if (errorDiv)
+                errorDiv.textContent = message;
+        })
+    }
+    
     eventlogin(container: HTMLElement) {
         const form = container.querySelector("form");
         if (!form) {
@@ -24,6 +35,11 @@ export class LoginRoute implements RouteI
             const usernameInput = form.querySelector('input[name="uname"]') as HTMLInputElement;
             const passwordInput = form.querySelector('input[name="psw"]') as HTMLInputElement;
 
+ 
+            ///ATTENTION BESOIN DE MIEUX GERER ICI
+            // ATTENTION BESOIN DE MIEUX GERER ICI 
+            // ATTENTION BESOIN DE MIEUX GERER ICI
+            
             if (!usernameInput || !passwordInput) {
                 console.error("Champs de formulaire manquants !");
                 return;

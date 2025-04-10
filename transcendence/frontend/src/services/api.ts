@@ -1,14 +1,19 @@
+import { AppError, UnauthenticatedError, ConflictError, ServerError } from "../utils/Errors.js";
 export class api 
 {
   async customFetch(url: string, options?: RequestInit): Promise<any> {
     const response = await fetch(url, options);
-
+    const json = await response.json();
     if (!response.ok) {
-      console.error("Erreur HTTP:", response.status);
-      return null;
-    }
+        const message = json.message || "Une erreur est survenue";
 
-    return await response.json();
+        switch (response.status) {
+            case 401: throw new UnauthenticatedError(message);
+            case 409: throw new ConflictError(message);
+            default:  throw new ServerError(message);
+        }
+    }
+    return json;
   }
 
   async post(route: string, data?: any): Promise<any> {

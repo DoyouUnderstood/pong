@@ -1,7 +1,7 @@
 import { RouteI } from "../interfaces/RouteInterface.js";
 import { User } from "../models/User.js";
 import { AuthService } from "../services/authService.js";
-
+import { eventBus } from "../utils/EventBus.js";
 export class SignupRoute implements RouteI
 {
     partial = "signup.html";
@@ -10,7 +10,18 @@ export class SignupRoute implements RouteI
     {
         console.log("bienvenue dans signup!");
         this.eventSubmit(container);
+        this.registerErrorListener(container);
     }
+    
+    private registerErrorListener(container: HTMLElement) 
+    {
+        eventBus.register("error:signup", (message: string) => {
+        const errorDiv = container.querySelector("#error-msg") as HTMLElement;
+            if (errorDiv)
+                errorDiv.textContent = message;
+        });
+    }
+
     eventSubmit(container: HTMLElement)
     {
         const form = container.querySelector("form");
