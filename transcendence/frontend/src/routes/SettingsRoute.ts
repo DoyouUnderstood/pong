@@ -39,7 +39,10 @@ export class SettingsRoute implements RouteI{
                 const username = usernameInput.value;
                 const password = passwordInput.value;
                 const email = emailInput.value;
-                const user = new User(username, password, email);
+                const id = AuthService.getCurrentId();
+                if (!id)
+                    return;
+                const user = new User(username, password, email, id);
                 AuthService.updateUser(user);
         });
     }

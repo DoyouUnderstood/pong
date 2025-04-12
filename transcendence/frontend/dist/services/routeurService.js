@@ -27,7 +27,6 @@ export class RouterService {
         const route = __classPrivateFieldGet(this, _RouterService_route, "f").get(path);
         if (!route)
             return;
-        //verifier que la route est en @@
         window.history.pushState(null, "", path);
         const html = await loadService(route.partial);
         __classPrivateFieldGet(this, _RouterService_currentRoute, "f")?.cleanup?.();

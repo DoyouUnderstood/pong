@@ -1,5 +1,20 @@
 import db from "../db/sqlite.js";
-import { execute, selectOne } from '../db/helpers.js';
+import {executeInsert, execute, selectOne } from '../db/helpers.js';
+
+export async function updateUserDB(username, password, email, id) {
+    const result = await execute(db, 
+        `UPDATE User SET username = ?, password = ?, email = ? WHERE id = ?`,
+        [username, password, email, id]
+    );
+
+    if (result.changes === 0)
+        return null; // pas de lignes modifiées = erreur
+
+    return await selectOne(db, 
+        `SELECT * FROM User WHERE id = ?`,
+        [id]
+    );
+}
 
 export async function loginUserDB(username, password) {
     return await selectOne(db, 
@@ -8,14 +23,19 @@ export async function loginUserDB(username, password) {
     );    
 }
 
-export async function signupUserDB(username, password, email) {
-    
-    return await execute(db, 
-    `INSERT INTO User (username, password, email) VALUES(?, ?, ?)`,
-    [username, password, email]
+export async function signupUserDB(username, password, email) 
+{
+    const result = await executeInsert(db, 
+        `INSERT INTO User (username, password, email) VALUES(?, ?, ?)`,
+        [username, password, email]
+    );
+
+    // On recupere l'user complet via l'id genere
+    return await selectOne(db, 
+        `SELECT * FROM User WHERE id = ?`,
+        [result.lastID]
     );
 }
-
 export async function isEmailTaken(email)
 {
     const result = await selectOne(db, 

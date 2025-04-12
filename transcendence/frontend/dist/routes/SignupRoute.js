@@ -1,5 +1,6 @@
 import { User } from "../models/User.js";
 import { AuthService } from "../services/authService.js";
+import { eventBus } from "../utils/EventBus.js";
 export class SignupRoute {
     constructor() {
         this.partial = "signup.html";
@@ -8,6 +9,14 @@ export class SignupRoute {
     async setup(container) {
         console.log("bienvenue dans signup!");
         this.eventSubmit(container);
+        this.registerErrorListener(container);
+    }
+    registerErrorListener(container) {
+        eventBus.register("error:signup", (message) => {
+            const errorDiv = container.querySelector("#error-msg");
+            if (errorDiv)
+                errorDiv.textContent = message;
+        });
     }
     eventSubmit(container) {
         const form = container.querySelector("form");

@@ -1,0 +1,4 @@
+fichier database/helpers.js pour simplifier les requetes sql. 
+    execute est utiliser pour INSERT, UPDATE, DELETE, CREATE TABLE. 
+    selectOne est utiliser pour recuperer une ligne d'une table. (SELECT).
+

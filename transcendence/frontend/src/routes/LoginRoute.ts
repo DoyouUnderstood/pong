@@ -35,13 +35,8 @@ export class LoginRoute implements RouteI
             const usernameInput = form.querySelector('input[name="uname"]') as HTMLInputElement;
             const passwordInput = form.querySelector('input[name="psw"]') as HTMLInputElement;
 
- 
-            ///ATTENTION BESOIN DE MIEUX GERER ICI
-            // ATTENTION BESOIN DE MIEUX GERER ICI 
-            // ATTENTION BESOIN DE MIEUX GERER ICI
-            
             if (!usernameInput || !passwordInput) {
-                console.error("Champs de formulaire manquants !");
+                eventBus.dispatch("error:login", "Tous les champs sont obligatoires.");
                 return;
             }
             const username = usernameInput.value;

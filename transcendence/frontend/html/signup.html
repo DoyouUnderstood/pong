@@ -1,13 +1,18 @@
-<div id="signup">
-  <h2>Sign Up</h2>
-  <form>
-    <input name="username" type="username" placeholder="Username"><br>
-    <input name="email" type="email" placeholder="Email"><br>
-    <input name="password" type="password" placeholder="Password"><br>
-    <button type="submit">Sign Up</button>
+<div class="bg-blue-500 min-h-screen flex justify-center items-center">
+  <form class="flex flex-col gap-4 w-1/3">
+    <h2 class="text-2xl text-white text-center">Sign Up</h2>
+    
+    <input class="p-2 border border-gray-300 rounded" name="username" placeholder="Username">
+    <input class="p-2 border border-gray-300 rounded" name="email" placeholder="Email">
+    <input class="p-2 border border-gray-300 rounded" name="password" placeholder="Password">
+    
+    <button class="bg-green-500 text-white p-2 rounded hover:bg-green-700">Sign Up</button>
+
+    <div id="error-msg" class="text-red-500 text-center"></div>
+
+    <div class="text-center text-white">
+      Already signup ? <a class="underline" href="/login">Login</a>
+    </div>
   </form>
-   <div class="container" style="background-color:#f1f1f1">
-          <span> Already signup ?<a href="/login">Login</a></span>
-  </div>
 </div>
 

@@ -1,3 +1,4 @@
+import { eventBus } from "../utils/EventBus.js";
 import { AuthService } from "../services/authService.js";
 import { User } from "../models/User.js";
 export class LoginRoute {
@@ -8,6 +9,15 @@ export class LoginRoute {
     async setup(container) {
         console.log("Page login affichée");
         this.eventlogin(container);
+        this.loginErrorListener(container);
+    }
+    loginErrorListener(container) {
+        eventBus.register("error:login", (message) => {
+            console.log(message);
+            const errorDiv = container.querySelector("#error-msg");
+            if (errorDiv)
+                errorDiv.textContent = message;
+        });
     }
     eventlogin(container) {
         const form = container.querySelector("form");
@@ -20,7 +30,7 @@ export class LoginRoute {
             const usernameInput = form.querySelector('input[name="uname"]');
             const passwordInput = form.querySelector('input[name="psw"]');
             if (!usernameInput || !passwordInput) {
-                console.error("Champs de formulaire manquants !");
+                eventBus.dispatch("error:login", "Tous les champs sont obligatoires.");
                 return;
             }
             const username = usernameInput.value;
