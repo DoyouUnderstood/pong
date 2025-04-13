@@ -2,6 +2,7 @@ import db from "../db/sqlite.js";
 import {executeInsert, execute, selectOne } from '../db/helpers.js';
 
 export async function updateUserDB(username, password, email, id) {
+    
     const result = await execute(db, 
         `UPDATE User SET username = ?, password = ?, email = ? WHERE id = ?`,
         [username, password, email, id]
@@ -17,6 +18,7 @@ export async function updateUserDB(username, password, email, id) {
 }
 
 export async function loginUserDB(username, password) {
+    
     return await selectOne(db, 
     `SELECT * FROM User WHERE username = ? AND password = ?`,
     [username, password]
@@ -25,9 +27,12 @@ export async function loginUserDB(username, password) {
 
 export async function signupUserDB(username, password, email) 
 {
+
+    const hashpass = fastify.bcrypt.hash(password);
+    console.log("!!!!!!!! ICI EST LE HASH PASS !!!!!!", hashpass);
     const result = await executeInsert(db, 
         `INSERT INTO User (username, password, email) VALUES(?, ?, ?)`,
-        [username, password, email]
+        [username, hashpass, email]
     );
 
     // On recupere l'user complet via l'id genere

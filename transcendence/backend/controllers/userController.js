@@ -25,6 +25,20 @@ export async function updateUser(request, reply)
             password: "",
         }
     });
+
+    /*
+     * try {
+     *      const user = await userService.signup() 
+     * }
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+
 }
 
 export async function connectUser(request, reply)

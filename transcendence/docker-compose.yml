@@ -18,7 +18,7 @@ services:
     volumes:
       - ./backend:/app
     working_dir: /app
-    command: sh -c "npm install && npm install -g nodemon && npm install sqlite3 &&npm start"
+    command: sh -c "npm install && npm install -g nodemon && npm install sqlite3 && npm i --save fastify-bcrypt && npm start"
     networks:
       - transcendence
   nginx:

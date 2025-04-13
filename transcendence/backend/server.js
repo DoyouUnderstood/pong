@@ -1,14 +1,20 @@
 // Import the framework and instantiate it
-import Fastify from 'fastify'
-import sqlite3 from "sqlite3";
-import { execute } from './db/helpers.js';
+import Fastify from 'fastify';
 import { initDB } from './db/init.js';
 import userRoute from './routes/userRoutes.js';
+import bcryptPlugin from './plugins/bcrypt.js';
+
 
 await initDB();
+
 const fastify = Fastify({
   logger:    true
 })
+
+await fastify.register(bcryptPlugin);
+
+
+
 
 await userRoute(fastify);
 
