@@ -1,6 +1,14 @@
 import db from "../db/sqlite.js";
 import {executeInsert, execute, selectOne } from '../db/helpers.js';
 
+export async function getUserById(id) {
+    return await selectOne(db,
+        `SELECT * FROM User WHERE id = ?`,
+        [id]
+    )
+}
+
+
 export async function updateUserDB(username, password, email, id) {
     
     const result = await execute(db, 
@@ -17,22 +25,19 @@ export async function updateUserDB(username, password, email, id) {
     );
 }
 
-export async function loginUserDB(username, password) {
-    
-    return await selectOne(db, 
-    `SELECT * FROM User WHERE username = ? AND password = ?`,
-    [username, password]
-    );    
+export async function getUserByUsername(username) {
+    return await selectOne(db,
+        `SELECT * FROM User WHERE username = ?`,
+        [username]
+    )
 }
 
 export async function signupUserDB(username, password, email) 
 {
 
-    const hashpass = fastify.bcrypt.hash(password);
-    console.log("!!!!!!!! ICI EST LE HASH PASS !!!!!!", hashpass);
     const result = await executeInsert(db, 
         `INSERT INTO User (username, password, email) VALUES(?, ?, ?)`,
-        [username, hashpass, email]
+        [username, password, email]
     );
 
     // On recupere l'user complet via l'id genere
@@ -41,6 +46,7 @@ export async function signupUserDB(username, password, email)
         [result.lastID]
     );
 }
+
 export async function isEmailTaken(email)
 {
     const result = await selectOne(db, 
@@ -51,6 +57,7 @@ export async function isEmailTaken(email)
         return true;
     return false;
 }
+
 export async function isUsernameTaken(username) {
     const result = await selectOne(db, 
         `SELECT * FROM User WHERE username = ?`,

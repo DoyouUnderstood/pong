@@ -1,8 +1,9 @@
+import fp from 'fastify-plugin'
 import fastifyBcrypt from 'fastify-bcrypt'
 
-export default async function bcryptPlugin(fastify, opts) {
+export default fp(async function (fastify, opts) {
   fastify.register(fastifyBcrypt, {
-    saltWorkFactor: 12,
+    saltWorkFactor: 12
   })
-}
+})
 

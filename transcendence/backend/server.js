@@ -1,24 +1,22 @@
-// Import the framework and instantiate it
-import Fastify from 'fastify';
-import { initDB } from './db/init.js';
-import userRoute from './routes/userRoutes.js';
-import bcryptPlugin from './plugins/bcrypt.js';
+import Fastify from 'fastify'
+import { initDB } from './db/init.js'
+import userRoute from './routes/userRoutes.js'
+import bcryptPlugin from './plugins/bcrypt.js'
+import { buildContainer } from './container.js'
 
-
-await initDB();
+await initDB()
 
 const fastify = Fastify({
-  logger:    true
+  logger: true,
 })
 
-await fastify.register(bcryptPlugin);
+await fastify.register(bcryptPlugin)
 
+const container = buildContainer({ bcrypt: fastify.bcrypt })
 
+await userRoute(fastify, container)
 
-
-await userRoute(fastify);
-
-fastify.get('/', async function handler (request, reply) {
+fastify.get('/', async function handler(request, reply) {
   return { hello: 'bruh' }
 })
 
@@ -28,3 +26,4 @@ try {
   fastify.log.error(err)
   process.exit(1)
 }
+
