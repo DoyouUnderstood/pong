@@ -2,7 +2,10 @@ import { AppError, UnauthenticatedError, ConflictError, ServerError } from "../u
 export class api 
 {
   async customFetch(url: string, options?: RequestInit): Promise<any> {
-    const response = await fetch(url, options);
+    const response = await fetch(url, {
+        credentials: 'include',
+        ...options
+    });
     const json = await response.json();
     if (!response.ok) {
         const message = json.message || "Une erreur est survenue";
@@ -17,17 +20,25 @@ export class api
   }
 
   async post(route: string, data?: any): Promise<any> {
-    const response = await this.customFetch("/api/" + route, {
+      const body = data !== undefined ? JSON.stringify(data) : JSON.stringify({});
+      const response = await this.customFetch("/api/" + route, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: data ? JSON.stringify(data) : undefined
-    });
+      body
 
-    
+    });
     return response;
   }
+  async get(route: string): Promise<any> {
+  const response = await this.customFetch("/api/" + route, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  return response;
+}
 }
 
 

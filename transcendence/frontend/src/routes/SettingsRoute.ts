@@ -1,7 +1,7 @@
 import { User } from "../models/User.js";
 import { RouteI } from "../interfaces/RouteInterface.js";
 import { eventBus } from "../utils/EventBus.js";
-import { AuthService } from "../services/authService.js";
+import { authService, AuthService } from "../services/authService.js";
 
 export class SettingsRoute implements RouteI{
     partial = "settings.html";
@@ -21,15 +21,19 @@ export class SettingsRoute implements RouteI{
                 msg_div.textContent = message; 
         })
     }
-
+    
     formEvent(container: HTMLElement)
     {
+        const button = container.getElementsByClassName("SMS")[0] as HTMLElement;
+        if (!button)
+            return;
+        button.addEventListener("click" , (err: MouseEvent) => {
+            err.preventDefault();
+            AuthService.send_sms_code();
+        });
         const form = container.querySelector("form");
         if (!form)
-        {
-            console.log("erreur dans le formulaire.");
             return ;
-        }
         form.addEventListener("submit", (e) => {
                 e.preventDefault();
                 const usernameInput = form.querySelector('input[name="username"]') as HTMLInputElement;

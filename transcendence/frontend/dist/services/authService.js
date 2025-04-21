@@ -20,12 +20,44 @@ export class authService {
         _authService_isAuthenticated.set(this, false);
         _authService_currentUser.set(this, null);
     }
+    async init() {
+        try {
+            const response = await Api.get("me");
+            __classPrivateFieldSet(this, _authService_isAuthenticated, true, "f");
+            __classPrivateFieldGet(this, _authService_instances, "m", _authService_storeUser).call(this, response.user);
+            console.log("Session restored:", response.user);
+        }
+        catch (err) {
+            __classPrivateFieldSet(this, _authService_isAuthenticated, false, "f");
+            __classPrivateFieldSet(this, _authService_currentUser, null, "f");
+            // Ne fais pas de naviguate ici ! C'est le rôle de app.ts
+        }
+    }
+    async send_sms_code() {
+        const data = { message: "ceci est le message de la fonction send_sms_code", to: "+33668788341" };
+        const response = await Api.post("send-sms", data);
+        console.log("salutpetit.c'est la sms fonction.");
+        console.log(response);
+        eventBus.dispatch("update-user", "le sms est envoye !");
+    }
+    async logout() {
+        try {
+            const response = await Api.post("logout");
+            console.log(response.message);
+        }
+        catch (err) {
+            console.warn("Failed to notify backend:", err);
+        }
+        __classPrivateFieldSet(this, _authService_isAuthenticated, false, "f");
+        __classPrivateFieldSet(this, _authService_currentUser, null, "f");
+        await router.naviguate("login");
+    }
     async login(user) {
         try {
             const response = await Api.post("login", user);
             __classPrivateFieldSet(this, _authService_isAuthenticated, true, "f");
             __classPrivateFieldGet(this, _authService_instances, "m", _authService_storeUser).call(this, response.user);
-            await router.naviguate("home");
+            await router.naviguate("dashboard");
         }
         catch (error) {
             if (error instanceof AppError)
@@ -36,7 +68,6 @@ export class authService {
         try {
             const response = await Api.post("signup", user);
             __classPrivateFieldGet(this, _authService_instances, "m", _authService_storeUser).call(this, response.user);
-            console.log("voici l'id de la reponse et celui cense etre stocke: ", response.user.id, this.getCurrentId());
             router.naviguate("login");
         }
         catch (error) {
@@ -46,9 +77,7 @@ export class authService {
     }
     async updateUser(user) {
         try {
-            console.log("user envoyé pour update :", user);
             const response = await Api.post("update", user);
-            console.log("response apres changement: ", response.user.username);
             __classPrivateFieldGet(this, _authService_instances, "m", _authService_storeUser).call(this, response.user);
             eventBus.dispatch("update:user", "settings correctly updated.");
         }
@@ -75,6 +104,7 @@ _authService_isAuthenticated = new WeakMap(), _authService_currentUser = new Wea
         username: userData.username,
         email: userData.email,
         password: "", // jamais stocker le vrai password en front
+        token: userData.token,
     }, "f");
 };
 export const AuthService = new authService();

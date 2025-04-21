@@ -1,15 +1,15 @@
 import { User } from "../models/User.js";
 import { AuthService } from "../services/authService.js";
 import { eventBus } from "../utils/EventBus.js";
+import { isValidEmail } from "../utils/Errors.js";
 export class SignupRoute {
     constructor() {
         this.partial = "signup.html";
         this.authentification = "loginNotRequired";
     }
     async setup(container) {
-        console.log("bienvenue dans signup!");
-        this.eventSubmit(container);
         this.registerErrorListener(container);
+        this.eventSubmit(container);
     }
     registerErrorListener(container) {
         eventBus.register("error:signup", (message) => {
@@ -20,24 +20,21 @@ export class SignupRoute {
     }
     eventSubmit(container) {
         const form = container.querySelector("form");
-        if (!form) {
-            console.log("erreur dans le formulaire");
+        if (!form)
             return;
-        }
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             const usernameInput = form.querySelector('input[name="username"]');
             const passwordInput = form.querySelector('input[name="password"]');
             const emailInput = form.querySelector('input[name="email"]');
-            if (!usernameInput || !passwordInput || !emailInput) {
-                console.error("Champs de formulaire manquants !");
+            if (!usernameInput || !passwordInput || !emailInput || !isValidEmail(emailInput.value)) {
+                eventBus.dispatch("error:signup", "Error dans le formulaire.");
                 return;
             }
             const username = usernameInput.value;
             const password = passwordInput.value;
             const email = emailInput.value;
             const user = new User(username, password, email);
-            console.log("fin de eventl");
             AuthService.signup(user);
         });
     }

@@ -18,11 +18,16 @@ export class SettingsRoute {
         });
     }
     formEvent(container) {
-        const form = container.querySelector("form");
-        if (!form) {
-            console.log("erreur dans le formulaire.");
+        const button = container.getElementsByClassName("SMS")[0];
+        if (!button)
             return;
-        }
+        button.addEventListener("click", (err) => {
+            err.preventDefault();
+            AuthService.send_sms_code();
+        });
+        const form = container.querySelector("form");
+        if (!form)
+            return;
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             const usernameInput = form.querySelector('input[name="username"]');

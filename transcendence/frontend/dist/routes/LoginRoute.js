@@ -7,13 +7,11 @@ export class LoginRoute {
         this.authentification = "loginNotRequired";
     }
     async setup(container) {
-        console.log("Page login affichée");
         this.eventlogin(container);
         this.loginErrorListener(container);
     }
     loginErrorListener(container) {
         eventBus.register("error:login", (message) => {
-            console.log(message);
             const errorDiv = container.querySelector("#error-msg");
             if (errorDiv)
                 errorDiv.textContent = message;

@@ -9,7 +9,6 @@ export class LoginRoute implements RouteI
     authentification: "loginNotRequired" = "loginNotRequired";
 
     async setup(container: HTMLElement): Promise<void> {
-        console.log("Page login affichée");
         this.eventlogin(container);
         this.loginErrorListener(container);
     }
@@ -17,7 +16,6 @@ export class LoginRoute implements RouteI
     private loginErrorListener(container: HTMLElement)
     {
         eventBus.register("error:login", (message: string) => {
-            console.log(message);
             const errorDiv = container.querySelector("#error-msg") as HTMLElement;
             if (errorDiv)
                 errorDiv.textContent = message;

@@ -1,4 +1,11 @@
 // src/errors.ts
+
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+export function isValidEmail(email: string): boolean {
+  return emailRegex.test(email);
+}
+
 export class AppError extends Error {
   constructor(public status: number, public message: string) {
     super(message);

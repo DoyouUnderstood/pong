@@ -6,11 +6,12 @@ export class User implements UserI
     username: string;
     password: string;
     email?: string;
-
-    constructor(username: string, password: string, email?: string, id?: number) {
+    token?: string;
+    constructor(username: string, password: string, email?: string, id?: number, token?: string) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.id = id;
+        this.token = token;
     }
 }

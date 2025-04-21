@@ -8,13 +8,45 @@ export class authService
 {
     #isAuthenticated = false;
     #currentUser: User | null = null;
+
+    async init() {
+    try {
+        const response = await Api.get("me");
+        this.#isAuthenticated = true;
+        this.#storeUser(response.user);
+        console.log("Session restored:", response.user);
+        } catch (err) {
+            this.#isAuthenticated = false;
+            this.#currentUser = null;
+    // Ne fais pas de naviguate ici ! C'est le rôle de app.ts
+        }
+    }
+    async send_sms_code()
+    {
+            const data = {message: "ceci est le message de la fonction send_sms_code", to: "+33668788341"};
+            const response = await Api.post("send-sms", data);
+            console.log("salutpetit.c'est la sms fonction.");
+            console.log(response);
+            eventBus.dispatch("update-user", "le sms est envoye !");
+    }
+    async logout() {
+        try {
+            const response = await Api.post("logout");
+            console.log(response.message);
+        } catch (err) {
+            console.warn("Failed to notify backend:", err);
+        }
+            this.#isAuthenticated = false;
+            this.#currentUser = null;
+            await router.naviguate("login");
+    }
     async login(user: User) 
     {
         try {
             const response = await Api.post("login", user);
             this.#isAuthenticated = true;
             this.#storeUser(response.user);
-            await router.naviguate("home");
+            await router.naviguate("dashboard");
         }
         catch (error)
         {
@@ -28,7 +60,6 @@ export class authService
         try {
             const response = await Api.post("signup", user);
             this.#storeUser(response.user);
-            console.log("voici l'id de la reponse et celui cense etre stocke: ", response.user.id, this.getCurrentId());
             router.naviguate("login");
         } catch (error) {
             if (error instanceof AppError)
@@ -39,9 +70,7 @@ export class authService
     async updateUser(user: User)
     {
         try {
-            console.log("user envoyé pour update :", user);
             const response = await Api.post("update", user);
-            console.log("response apres changement: ",response.user.username);
             this.#storeUser(response.user);
             eventBus.dispatch("update:user", "settings correctly updated.");
         } catch (error)
@@ -69,6 +98,7 @@ export class authService
         username: userData.username,
         email: userData.email,
         password: "",  // jamais stocker le vrai password en front
+        token: userData.token, 
     };
 }
 
