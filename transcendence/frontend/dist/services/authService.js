@@ -30,16 +30,17 @@ export class authService {
         catch (err) {
             __classPrivateFieldSet(this, _authService_isAuthenticated, false, "f");
             __classPrivateFieldSet(this, _authService_currentUser, null, "f");
-            // Ne fais pas de naviguate ici ! C'est le rôle de app.ts
         }
     }
-    async send_sms_code() {
-        const data = { message: "ceci est le message de la fonction send_sms_code", to: "+33668788341" };
-        const response = await Api.post("send-sms", data);
-        console.log("salutpetit.c'est la sms fonction.");
-        console.log(response);
-        eventBus.dispatch("update-user", "le sms est envoye !");
+    // ceci n'a rien a faire ici
+    /*
+    async get_qr_code()
+    {
+            const response = await Api.get("qr-code");
+            console.log("salutpetit.c'est le qr code fonction.", response.src);
+            return response.src;
     }
+    */
     async logout() {
         try {
             const response = await Api.post("logout");

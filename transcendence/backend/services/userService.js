@@ -1,6 +1,10 @@
-import { getUserById, updateUserDB, getUserByUsername, isUsernameTaken, isEmailTaken, signupUserDB } from '../models/userModels.js'
+import { getUserById, updateUserDB, getUserByUsername, isUsernameTaken, isEmailTaken, signupUserDB, setUser2FAEnabled } from '../models/userModels.js'
 
-export default function userServiceFactory({ bcrypt }) {
+import { bcryptLib } from '../plugins/bcrypt.js'; // <-- assure-toi d'importer la bonne version
+
+export default function userServiceFactory() {
+
+
     return {
         async signup({ username, password, email }) {
             if (await isUsernameTaken(username)) {
@@ -15,7 +19,7 @@ export default function userServiceFactory({ bcrypt }) {
                 throw error
             }
 
-            const hashedPassword = await bcrypt.hash(password)
+            const hashedPassword = await bcryptLib.hash(password)
 
             const user = await signupUserDB(username, hashedPassword, email)
 
@@ -32,46 +36,54 @@ export default function userServiceFactory({ bcrypt }) {
             }
         },
         async login({ username, password }) {
-            const user = await getUserByUsername(username)
+    const user = await getUserByUsername(username)
 
-            if (!user) {
-                const error = new Error("Identifiants invalides.")
-                error.statusCode = 401
-                throw error
-            }
+    if (!user) {
+        const error = new Error("Identifiants invalides.")
+        error.statusCode = 401
+        throw error
+    }
+    console.log("skkrt - avant bcrypt.compare");
+        
+            console.log("Comparaison entre :", password, user.password);
+    try {
+        const isValidPassword = await bcryptLib.compare(password, user.password)
+        console.log("skkrt - après bcrypt.compare");
 
-            const isValidPassword = await bcrypt.compare(password, user.password)
+        if (!isValidPassword) {
+            const error = new Error("Identifiants invalides.");
+            error.statusCode = 401;
+            throw error;
+        }
 
-            if (!isValidPassword) {
-                const error = new Error("Identifiants invalides.")
-                error.statusCode = 401
-                throw error
-            }
+        return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+        };
+    } catch (err) {
+        console.error("Erreur bcrypt.compare:", err);
+        throw err;
+    }
+},
 
-            return {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-            }
-        },
         async update({ id, username, password, email }) {
-            const userExist = await getUserById(id);
-
-            if (!userExist) {
+            const user = await getUserById(id);
+                
+            console.log("Comparaison entre :", password, user.password);
+            if (!user) {
                 const error = new Error("Utilisateur non trouvé.");
                 error.statusCode = 404;
                 throw error;
             }
 
             const usernameTaken = await isUsernameTaken(username);
-            if (usernameTaken && userExist.username !== username) {
+            if (usernameTaken && user.username !== username) {
                 const error = new Error("Ce pseudo est déjà utilisé.");
                 error.statusCode = 409;
                 throw error;
             }
-
-            const hashedPassword = await bcrypt.hash(password);
-
+            const hashedPassword = await bcryptLib.hash(password);
             const updatedUser = await updateUserDB(username, hashedPassword, email, id);
 
             if (!updatedUser) {
@@ -85,7 +97,16 @@ export default function userServiceFactory({ bcrypt }) {
                 username: updatedUser.username,
                 email: updatedUser.email,
             };
+        },
+        async getById(id) {
+            return await getUserById(id);
+        },
+        async save2FASecret(id, secret) {
+            return await updateUser2FASecret(id, secret); // À créer dans models
+        },
+        async enable2FA(id) {
+            return await setUser2FAEnabled(id); // À créer dans models
         }
+
     }
 }
-

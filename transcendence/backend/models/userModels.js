@@ -1,6 +1,14 @@
 import db from "../db/sqlite.js";
 import {executeInsert, execute, selectOne } from '../db/helpers.js';
 
+export async function updateUser2FASecret(id, secret) {
+    return await execute(db, `UPDATE User SET totpSecret = ? WHERE id = ?`, [secret, id]);
+}
+
+export async function setUser2FAEnabled(id) {
+    return await execute(db, `UPDATE User SET twofaEnabled = 1 WHERE id = ?`, [id]);
+}
+
 export async function getUserById(id) {
     return await selectOne(db,
         `SELECT * FROM User WHERE id = ?`,

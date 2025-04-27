@@ -18,17 +18,19 @@ export class authService
         } catch (err) {
             this.#isAuthenticated = false;
             this.#currentUser = null;
-    // Ne fais pas de naviguate ici ! C'est le rôle de app.ts
         }
     }
-    async send_sms_code()
+
+    // ceci n'a rien a faire ici
+    /*
+    async get_qr_code()
     {
-            const data = {message: "ceci est le message de la fonction send_sms_code", to: "+33668788341"};
-            const response = await Api.post("send-sms", data);
-            console.log("salutpetit.c'est la sms fonction.");
-            console.log(response);
-            eventBus.dispatch("update-user", "le sms est envoye !");
+            const response = await Api.get("qr-code");
+            console.log("salutpetit.c'est le qr code fonction.", response.src);       
+            return response.src;
     }
+    */
+
     async logout() {
         try {
             const response = await Api.post("logout");

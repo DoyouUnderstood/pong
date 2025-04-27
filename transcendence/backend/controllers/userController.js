@@ -1,3 +1,21 @@
+export async function getUserCredential(request, reply, userService)
+{
+    const user = await userService.getById(request.user.id);
+    console.log(user);
+    reply.send({status: 200, message: "voici l'user", user})
+}
+
+export async function logoutUser(request, reply)
+{
+    reply.clearCookie("jwt", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict"
+    });
+
+  reply.send({ message: "Logged out successfully" });
+}
+
 export async function updateUser(request, reply, userService)
 {
     const { id, username, password, email } = request.body;
@@ -17,27 +35,26 @@ export async function updateUser(request, reply, userService)
     }
 }
 
-export async function connectUser(request, reply, userService, jwtService) {
-    const { username, password } = request.body
-
+export async function connectUser(request, reply, authService) {
+    const { username, password } = request.body;
     try {
-        const user = await userService.login({ username, password })
-        const token = jwtService.generateToken({user: user.username, id: user.id});
-        console.log("ICI EST LE TOKEN WOWOWOOW", token);
-        reply.setCookie('jwt', token, {
-            httpOnly: false,
-            secure: process.env.JWT_SECRET,
-            sameSite: 'lax',
-            path: '/'
-        })
-        .send({
-            status: 200,
+
+        const result = await authService.login({ username, password });
+        if (result.twoFARequired) 
+            return reply.send({ twoFARequired: true, userId: result.userId });
+
+        reply.setCookie('jwt', result.token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            path: '/',
+        }).send({
             message: "Connexion réussie !",
-            user,
-            token
-        })
+            user: result.user,
+        });
+
     } catch (err) {
-        reply.status(err.statusCode || 500).send({ message: err.message })
+        reply.sendError(err);
     }
 }
 
@@ -47,15 +64,17 @@ export async function signupUser(request, reply, userService)
     
     try {
         const user = await userService.signup({ username, password, email })
-
+    
         reply.send({
             status: 200,
             message: "Inscription réussie !",
             user,
         })
-    } catch (err) {
-        reply.status(err.statusCode || 500).send({ message: err.message })
+    } catch (err)
+    {
+        reply.sendError(err);
     }
-
 }
 
+/*
+    */

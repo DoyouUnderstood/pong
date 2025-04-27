@@ -5,12 +5,13 @@ import { SignupRoute } from "./routes/SignupRoute.js";
 import { SettingsRoute } from "./routes/SettingsRoute.js";
 import {AuthService} from "./services/authService.js"; // ← important : forcer l’instanciation
 import { DashboardRoute } from "./routes/DashboardRoute.js";
+import { DoubleAuthRoute } from "./routes/DoubleAuthRoute.js";
 
 router.addRoute('home', new HomeRoute());
 router.addRoute('login', new LoginRoute());
 router.addRoute('signup', new SignupRoute());
 router.addRoute('settings', new SettingsRoute());
 router.addRoute('dashboard', new DashboardRoute());
-
+router.addRoute('doubleauth', new DoubleAuthRoute());
 router.setup(document.getElementById('app')!);
 await router.start();
