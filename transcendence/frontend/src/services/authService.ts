@@ -20,7 +20,6 @@ export class authService
             this.#currentUser = null;
         }
     }
-
     // ceci n'a rien a faire ici
     /*
     async get_qr_code()
@@ -32,12 +31,8 @@ export class authService
     */
 
     async logout() {
-        try {
             const response = await Api.post("logout");
             console.log(response.message);
-        } catch (err) {
-            console.warn("Failed to notify backend:", err);
-        }
             this.#isAuthenticated = false;
             this.#currentUser = null;
             await router.naviguate("login");
@@ -46,6 +41,8 @@ export class authService
     {
         try {
             const response = await Api.post("login", user);
+            if (response.twoFARequired == true)
+                this.handle2FA();
             this.#isAuthenticated = true;
             this.#storeUser(response.user);
             await router.naviguate("dashboard");
@@ -56,10 +53,14 @@ export class authService
                 eventBus.dispatch("error:login", error.message);
         }
     }
-
+    private handle2FA()
+    {
+        
+    }
     async signup(user: User)
     {
         try {
+            console.log(user);
             const response = await Api.post("signup", user);
             this.#storeUser(response.user);
             router.naviguate("login");
@@ -101,6 +102,8 @@ export class authService
         email: userData.email,
         password: "",  // jamais stocker le vrai password en front
         token: userData.token, 
+        twoFAEnabled: userData.twoFAEnabled,
+        twoFAMethod: userData.twoFAMethod,
     };
 }
 

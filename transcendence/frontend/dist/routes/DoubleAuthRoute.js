@@ -1,8 +1,8 @@
 import { Api } from '../services/api.js';
 import { AuthService } from '../services/authService.js';
-export class DoubleAuthRoute {
+export class Select2FAMethodRoute {
     constructor() {
-        this.partial = 'doubleauth.html';
+        this.partial = 'select-2fa-method.html';
         this.authentification = "loginRequired";
     }
     async setup(container) {
@@ -27,7 +27,7 @@ export class DoubleAuthRoute {
                 requestAnimationFrame(() => {
                     const firstInput = divEmail.querySelector('input[data-2fa]');
                     firstInput?.focus();
-                    resolve(); // ✅ On continue quand le HTML est injecté
+                    resolve();
                 });
             });
         });
@@ -63,7 +63,7 @@ export class DoubleAuthRoute {
         await Api.post('2fa/mail/setup', user);
     }
     async verifyDigits(code) {
-        console.log("🔐 Vérification du code:", code);
+        console.log("Vérification du code:", code);
         const currentuser = AuthService.getCurrentUser();
         const user = {
             code: code,

@@ -1,45 +1,81 @@
-import { sendEmail, generateCode, saveCode, verifyCode} from '../services/emailService.js';
+import { sendEmail, generateCode, saveCode, verifyEmailCode} from '../services/emailService.js';
 import { getUserByUsername } from '../models/userModels.js';
+import QRCode from 'qrcode'; // IMPORT en backend aussi
+
+
+export async function verify2FAqrcode(request, reply, authService, userService)
+{
+    try {
+        await authService.verify2FAQrCode(request.user.id, request.body.code);
+        await userService.enable2FA(request.user.id, "qr-code");
+       
+        reply.status(200).send({message: "le code est bon !"});
+    } catch(err)
+    {
+        reply.status(500).send({message: "le code est pas bon!"});
+    }
+}
+export async function get2FAStatus(request, reply)
+{
+    const user = await getUserByUsername(request.user.username);
+    const twoFAactivate = user.twoFAEnabled
+    const method = user.twoFAMethod;
+    if (twoFAactivate)
+        reply.status(200).send({ twoFAEnabled: true, twoFAMethod: method});
+    reply.status(200).send({twoFAEnabled: false});
+}
+
+
 export async function mail2FAsetup(request, reply) 
 {
   const user = request.user;
   const email = user.email;
     const code = generateCode();
-    console.log("voici le code");
+    console.log("voici le code", code);
     await saveCode(user, code);
 
   try {
     await sendEmail(email, code);
     reply.send({ message: "Code 2FA envoyé par email." });
   } catch (err) {
-    console.error(err);
+    console.error("voici l'erreur", err);
     reply.status(500).send({ message: "Erreur lors de l'envoi du mail 2FA." });
   }
 }
 
 export async function verify2FAemail(request, reply, userService)
 {
-    const user = request.user;
-    const code = request.body.code;
-    console.log(code);
-    const user2 = await getUserByUsername(user.username);
-
-    await verifyCode(user2.id, code);
-    await userService.enable2FA(user2.id);
-    reply.status(200).send({message: "Code bon 2FA active avec succes!"});
+    try {
+        const code = request.body.code;
+        const user = await getUserByUsername(request.user.username);
+        await verifyEmailCode(user.id, code);
+        await userService.enable2FA(user.id, request.body.twoFAMethod);
+        reply.status(200).send({message: "Code bon 2FA active avec succes!"});
+    }
+    catch (err) {
+        reply.status(500).send({message: "Erreur lors de la verification du code."});
+    }
 }
-export async function generate2FA(request, reply) {
+
+export async function generate2FAQrCode(request, reply) {
   try {
     const user = request.user;
     const { authService } = request.server.container;
-    const { otpauth_url } = await authService.setup2FA(user);
+    const { otpauth_url } = await authService.setup2FAQrCode(user);
 
-    reply.send({ otpauth_url });
+    console.log("OTP URL ! ", otpauth_url);
+
+    const qrCodeBuffer = await QRCode.toBuffer(otpauth_url);
+
+    reply
+      .code(200)
+      .header('Content-Type', 'image/png')
+      .send(qrCodeBuffer);
   } catch (err) {
-    reply.status(500).send({ message: "Erreur lors de la génération du QR code." });
+    console.log(err);
+    reply.status(500).send({ message: "Erreur lors de la génération du QR code.", err });
   }
 }
-
 export async function verify2FASetup(request, reply) {
     
     console.log("CECI EST CENSE ETRE LE USER\n", request.body.user);
@@ -52,7 +88,7 @@ export async function verify2FASetup(request, reply) {
 
     await authService.enable2FA(user.id, code);
 
-    reply.send({ message: "2FA activé avec succès ✅" });
+    reply.send({ message: "2FA activé avec succès " });
   } catch (err) {
     reply.status(400).send({ message: err.message || "Code 2FA invalide" });
   }

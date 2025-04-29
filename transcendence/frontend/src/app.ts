@@ -3,15 +3,18 @@ import { HomeRoute } from "./routes/HomeRoute.js";
 import { LoginRoute } from "./routes/LoginRoute.js";
 import { SignupRoute } from "./routes/SignupRoute.js";
 import { SettingsRoute } from "./routes/SettingsRoute.js";
-import {AuthService} from "./services/authService.js"; // ← important : forcer l’instanciation
 import { DashboardRoute } from "./routes/DashboardRoute.js";
-import { DoubleAuthRoute } from "./routes/DoubleAuthRoute.js";
+import { Select2FAMethodRoute } from "./routes/Select2FAMethodRoute.js";
+import { Setup2FAEmailRoute } from "./routes/Setup2FAEmailRoute.js";
+import { Setup2FAQrCodeRoute } from "./routes/Setup2FAQrCodeRoute.js";
 
 router.addRoute('home', new HomeRoute());
 router.addRoute('login', new LoginRoute());
 router.addRoute('signup', new SignupRoute());
 router.addRoute('settings', new SettingsRoute());
 router.addRoute('dashboard', new DashboardRoute());
-router.addRoute('doubleauth', new DoubleAuthRoute());
+router.addRoute('select-2fa-method', new Select2FAMethodRoute());
+router.addRoute('setup-2fa-email', new Setup2FAEmailRoute());
+router.addRoute('setup-2fa-qrcode', new Setup2FAQrCodeRoute());
 router.setup(document.getElementById('app')!);
 await router.start();

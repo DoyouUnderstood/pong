@@ -42,13 +42,8 @@ export class authService {
     }
     */
     async logout() {
-        try {
-            const response = await Api.post("logout");
-            console.log(response.message);
-        }
-        catch (err) {
-            console.warn("Failed to notify backend:", err);
-        }
+        const response = await Api.post("logout");
+        console.log(response.message);
         __classPrivateFieldSet(this, _authService_isAuthenticated, false, "f");
         __classPrivateFieldSet(this, _authService_currentUser, null, "f");
         await router.naviguate("login");
@@ -56,6 +51,8 @@ export class authService {
     async login(user) {
         try {
             const response = await Api.post("login", user);
+            if (response.twoFARequired == true)
+                this.handle2FA();
             __classPrivateFieldSet(this, _authService_isAuthenticated, true, "f");
             __classPrivateFieldGet(this, _authService_instances, "m", _authService_storeUser).call(this, response.user);
             await router.naviguate("dashboard");
@@ -65,8 +62,11 @@ export class authService {
                 eventBus.dispatch("error:login", error.message);
         }
     }
+    handle2FA() {
+    }
     async signup(user) {
         try {
+            console.log(user);
             const response = await Api.post("signup", user);
             __classPrivateFieldGet(this, _authService_instances, "m", _authService_storeUser).call(this, response.user);
             router.naviguate("login");
@@ -106,6 +106,8 @@ _authService_isAuthenticated = new WeakMap(), _authService_currentUser = new Wea
         email: userData.email,
         password: "", // jamais stocker le vrai password en front
         token: userData.token,
+        twoFAEnabled: userData.twoFAEnabled,
+        twoFAMethod: userData.twoFAMethod,
     }, "f");
 };
 export const AuthService = new authService();

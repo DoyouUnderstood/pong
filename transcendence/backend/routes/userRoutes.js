@@ -17,7 +17,6 @@ fastify.get('/api/me', async (request, reply) => {
     fastify.post('/api/signup', (request, reply) => signupUser(request, reply, userService));
     fastify.post('/api/update', (request, reply) => updateUser(request, reply, userService));
     fastify.post('/api/logout', (request, reply) => logoutUser(request, reply));
-    fastify.get('/api/qr-code', (request, reply) => qrcodeUser(request, reply, qrcodeService));
-    
+   
     }
 

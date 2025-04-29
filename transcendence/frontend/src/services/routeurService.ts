@@ -38,36 +38,41 @@ export class RouterService {
 		this.#routes.set(path, route);
 	}
 
-	async naviguate(path: string, fromPopState = false): Promise <void> {
-	if (path === this.#currentPath) 
-		return;
+    async naviguate(path: string, fromPopState = false): Promise<void> {
 
-	const route = this.#routes.get(path);
+        if (path === this.#currentPath && !fromPopState)
+            return;
 
-	if (!route) {
-		console.warn(`Route not found: ${path}`);
-		return this.naviguate("login");
-	}
+    const route = this.#routes.get(path);
 
-	if (route.authentification === "loginRequired" && !AuthService.islogin()) {
-		return this.naviguate("login");
-	}
-	if (route.authentification === "loginNotRequired" && AuthService.islogin()) {
-		return this.naviguate("home");
-	}
-	if (!fromPopState) {
-		window.history.pushState(null, "", `/${path}`);
-	}
-	const html = await loadService(route.partial);
-	this.#currentRoute?.cleanup?.();
-	if (this.#container) {
-		this.#container.innerHTML = html;
-		await route.setup(this.#container);
-	}
+    if (!route) {
+        console.warn(`Route not found: ${path}`);
+        return this.naviguate("login");
+    }
 
-	this.#currentRoute = route;
-	this.#currentPath = path;
-	}
+    if (route.authentification === "loginRequired" && !AuthService.islogin()) {
+        return this.naviguate("login");
+    }
+    if (route.authentification === "loginNotRequired" && AuthService.islogin()) {
+        return this.naviguate("home");
+    }
+
+    // 🔥 Toujours pousser dans l'historique SI ce n'est pas une navigation du bouton back/forward
+    if (!fromPopState) {
+        window.history.pushState(null, "", `/${path}`);
+    }
+
+    const html = await loadService(route.partial);
+    this.#currentRoute?.cleanup?.();
+    if (this.#container) {
+        this.#container.innerHTML = html;
+        await route.setup(this.#container);
+    }
+
+    this.#currentRoute = route;
+    this.#currentPath = path;
+}
+
 }
 
 export const router = new RouterService();

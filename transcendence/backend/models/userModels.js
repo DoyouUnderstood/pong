@@ -1,6 +1,10 @@
 import db from "../db/sqlite.js";
 import {executeInsert, execute, selectOne } from '../db/helpers.js';
 
+export async function getUserSecret(id)
+{
+    return await selectOne(db, `SELECT totpSecret from User WHERE id = ?`, [id]);
+}
 export async function updateUser2FASecret(id, secret) {
     return await execute(db, `UPDATE User SET totpSecret = ? WHERE id = ?`, [secret, id]);
 }
@@ -9,13 +13,22 @@ export async function setUser2FAEnabled(id) {
     return await execute(db, `UPDATE User SET twofaEnabled = 1 WHERE id = ?`, [id]);
 }
 
+export async function set2FAMethod(method, id)
+{
+    return await execute(db, `UPDATE User SET twoFAMethod = ? WHERE id = ?`, [method, id]);
+}
+
+export async function getUser2FAMethod(id)
+{
+    return await selectOne(db, `SELECT twoFAMethod FROM User WHERE id = ?`, [id]);
+}
+
 export async function getUserById(id) {
     return await selectOne(db,
         `SELECT * FROM User WHERE id = ?`,
         [id]
     )
 }
-
 
 export async function updateUserDB(username, password, email, id) {
     

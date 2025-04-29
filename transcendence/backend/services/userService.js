@@ -1,6 +1,6 @@
-import { getUserById, updateUserDB, getUserByUsername, isUsernameTaken, isEmailTaken, signupUserDB, setUser2FAEnabled } from '../models/userModels.js'
+import { getUserById, updateUserDB, getUserByUsername, isUsernameTaken, isEmailTaken, signupUserDB, setUser2FAEnabled, set2FAMethod, updateUser2FASecret, getUserSecret } from '../models/userModels.js'
 
-import { bcryptLib } from '../plugins/bcrypt.js'; // <-- assure-toi d'importer la bonne version
+import { bcryptLib } from '../plugins/bcrypt.js';
 
 export default function userServiceFactory() {
 
@@ -35,42 +35,33 @@ export default function userServiceFactory() {
                 email: user.email,
             }
         },
-        async login({ username, password }) {
-    const user = await getUserByUsername(username)
+        async validateCredentials({ username, password }) {
+            const user = await getUserByUsername(username);
 
-    if (!user) {
-        const error = new Error("Identifiants invalides.")
-        error.statusCode = 401
-        throw error
-    }
-    console.log("skkrt - avant bcrypt.compare");
-        
-            console.log("Comparaison entre :", password, user.password);
-    try {
-        const isValidPassword = await bcryptLib.compare(password, user.password)
-        console.log("skkrt - après bcrypt.compare");
+            if (!user) {
+                const error = new Error("Identifiants invalides.");
+                error.statusCode = 401;
+                throw error;
+            }
 
-        if (!isValidPassword) {
-            const error = new Error("Identifiants invalides.");
-            error.statusCode = 401;
-            throw error;
-        }
-
-        return {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-        };
-    } catch (err) {
-        console.error("Erreur bcrypt.compare:", err);
-        throw err;
-    }
-},
+            const isValidPassword = await bcryptLib.compare(password, user.password);
+            if (!isValidPassword) {
+                const error = new Error("Identifiants invalides.");
+                error.statusCode = 401;
+                throw error;
+            }
+            return {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                twoFAEnabled: user.twoFAEnabled,
+                twoFAMethod: user.twoFAMethod
+            };
+        },
 
         async update({ id, username, password, email }) {
             const user = await getUserById(id);
                 
-            console.log("Comparaison entre :", password, user.password);
             if (!user) {
                 const error = new Error("Utilisateur non trouvé.");
                 error.statusCode = 404;
@@ -98,14 +89,21 @@ export default function userServiceFactory() {
                 email: updatedUser.email,
             };
         },
+
+        async getSecret(id)
+        {
+            return await getUserSecret(id);
+        },
         async getById(id) {
             return await getUserById(id);
         },
         async save2FASecret(id, secret) {
-            return await updateUser2FASecret(id, secret); // À créer dans models
+            return await updateUser2FASecret(id, secret);
         },
-        async enable2FA(id) {
-            return await setUser2FAEnabled(id); // À créer dans models
+        async enable2FA(id, method) {
+            await setUser2FAEnabled(id);
+            await set2FAMethod(method, id);
+            return ;
         }
 
     }

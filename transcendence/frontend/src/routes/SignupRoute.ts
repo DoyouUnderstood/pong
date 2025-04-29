@@ -21,8 +21,7 @@ export class SignupRoute implements RouteI
                 errorDiv.textContent = message;
         });
     }
-
-    eventSubmit(container: HTMLElement)
+       eventSubmit(container: HTMLElement)
     {
         const form = container.querySelector("form");
         if (!form)

@@ -1,12 +1,28 @@
 import { RouteI } from '../interfaces/RouteInterface.js';
 import { Api } from '../services/api.js';
 import { AuthService } from '../services/authService.js';
-
-export class DoubleAuthRoute implements RouteI 
+import { router } from '../services/routeurService.js';
+export class Select2FAMethodRoute implements RouteI 
 {
-    partial = 'doubleauth.html';
+    partial = 'select-2fa-method.html';
     authentification: "loginRequired" = "loginRequired";
-    
+
+    async setup(container: HTMLElement): Promise<void> {
+        await this.choosingMethod(container);
+    }
+
+    private async choosingMethod(container: HTMLElement)
+    {
+        const emailMethod = container.querySelector("#twofaEmail") as HTMLElement;
+        emailMethod.addEventListener("click", () => {
+            router.naviguate("setup-2fa-email");
+        })
+        const qrcodeMethod = container.querySelector("#twofaqr-code") as HTMLElement;
+        qrcodeMethod.addEventListener("click", () => {
+            router.naviguate("setup-2fa-qrcode");
+        })
+    }
+ /*   
     async setup(container: HTMLElement): Promise<void> {
         await this.setupEmailMethod(container);
         await this.sendEmail();
@@ -30,7 +46,7 @@ export class DoubleAuthRoute implements RouteI
                 requestAnimationFrame(() => {
                     const firstInput = divEmail.querySelector('input[data-2fa]') as HTMLInputElement;
                     firstInput?.focus();
-                    resolve(); // ✅ On continue quand le HTML est injecté
+                    resolve();
                 });
             });
         });
@@ -41,7 +57,7 @@ export class DoubleAuthRoute implements RouteI
             const inputs = Array.from(container.querySelectorAll<HTMLInputElement>('input[data-2fa]'));
             const getCode = () => inputs.map(i => i.value).join('');
             const checkComplete = () => {
-                const code = getCode();
+               const code = getCode();
                 if (code.length === inputs.length && /^\d{6}$/.test(code)) {
                     resolve(code);
                 }
@@ -68,7 +84,7 @@ export class DoubleAuthRoute implements RouteI
     }
 
     private async verifyDigits(code: string) {
-        console.log("🔐 Vérification du code:", code);
+        console.log("Vérification du code:", code);
         const currentuser = AuthService.getCurrentUser();
         const user = {
             code: code,
@@ -77,6 +93,8 @@ export class DoubleAuthRoute implements RouteI
         const response = await Api.post('2fa/verify', user);
         return response;
     }
+*/
+
 }
 
 /*

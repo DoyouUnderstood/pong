@@ -24,7 +24,7 @@ export async function sendEmail(destinataire, code)
         text: 'Cet email est envoye depuis node.js avec nodemailer, pour le 2fa du pong!'
     };
 
-    console.log("email de l'envoyeur, email du destinataire", process.env.EMAIL_ADRESS, destinataire);
+    console.log("email de l'envoyeur, email du destinataire et code", process.env.EMAIL_ADRESS, destinataire, code);
     transporter.sendMail(mailOptions, function(error, info) {
         if (error)
             console.log("erreur lors de l'envoi.", error);
@@ -44,7 +44,7 @@ export async function saveCode(user, code)
     temp2FACodes.set(user.id, { code, expireAt: Date.now() + 5 * 60 * 1000 });
 }
 
-export async function verifyCode(userId, code) {
+export async function verifyEmailCode(userId, code) {
     const entry = temp2FACodes.get(userId);
     if (!entry) 
         throw new Error("Pas de code généré pour cet utilisateur.");

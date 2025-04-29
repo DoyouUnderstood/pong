@@ -45,7 +45,7 @@ export class RouterService {
         __classPrivateFieldGet(this, _RouterService_routes, "f").set(path, route);
     }
     async naviguate(path, fromPopState = false) {
-        if (path === __classPrivateFieldGet(this, _RouterService_currentPath, "f"))
+        if (path === __classPrivateFieldGet(this, _RouterService_currentPath, "f") && !fromPopState)
             return;
         const route = __classPrivateFieldGet(this, _RouterService_routes, "f").get(path);
         if (!route) {
@@ -58,6 +58,7 @@ export class RouterService {
         if (route.authentification === "loginNotRequired" && AuthService.islogin()) {
             return this.naviguate("home");
         }
+        // 🔥 Toujours pousser dans l'historique SI ce n'est pas une navigation du bouton back/forward
         if (!fromPopState) {
             window.history.pushState(null, "", `/${path}`);
         }

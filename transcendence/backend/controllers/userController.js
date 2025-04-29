@@ -61,10 +61,10 @@ export async function connectUser(request, reply, authService) {
 export async function signupUser(request, reply, userService)
 {
     const { username, password, email } = request.body;
-    
+    console.log("voici les infos:", username, password, email);
     try {
         const user = await userService.signup({ username, password, email })
-    
+        console.log("voici le user: ", user);
         reply.send({
             status: 200,
             message: "Inscription réussie !",
@@ -72,6 +72,7 @@ export async function signupUser(request, reply, userService)
         })
     } catch (err)
     {
+        console.log("ceci est le log de signup", err);
         reply.sendError(err);
     }
 }
