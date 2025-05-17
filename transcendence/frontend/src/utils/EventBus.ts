@@ -1,3 +1,14 @@
+export function addBackButtonListener(): void {
+    const backButton = document.getElementById("back-button");
+    if (backButton && !backButton.hasAttribute("data-bound")) {
+        backButton.setAttribute("data-bound", "true"); // évite le double binding
+        backButton.addEventListener("click", () => {
+            window.history.back();
+        });
+    }
+}
+
+
 export interface Registry {
   unregister: () => void;
 }

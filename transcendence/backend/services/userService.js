@@ -1,110 +1,97 @@
-import { getUserById, updateUserDB, getUserByUsername, isUsernameTaken, isEmailTaken, signupUserDB, setUser2FAEnabled, set2FAMethod, updateUser2FASecret, getUserSecret } from '../models/userModels.js'
-
-import { bcryptLib } from '../plugins/bcrypt.js';
-
-export default function userServiceFactory() {
-
-
+import {
+    findUserById,
+    updateUserById,
+    findUserByUsername,
+    checkUsernameExists,
+    checkEmailExists,
+    createUser,
+  } from '../models/userModels.js';
+  
+  import {
+    disableUserTwoFA,
+    enableUserTwoFA,
+    updateUserTwoFAMethod,
+    updateUserTwoFASecret,
+    findUserTwoFASecret,
+    updateUserTempTwoFASecret,
+  } from '../models/twoFAModels.js';
+  
+  import { bcryptLib } from '../plugins/bcrypt.js';
+  import { throwIf} from '../utils/errors.js';
+  
+  export default function userServiceFactory() {
     return {
-        async signup({ username, password, email }) {
-            if (await isUsernameTaken(username)) {
-                const error = new Error("Ce pseudo est déjà utilisé.")
-                error.statusCode = 409
-                throw error
-            }
-
-            if (await isEmailTaken(email)) {
-                const error = new Error("Cet email est déjà enregistré.")
-                error.statusCode = 409
-                throw error
-            }
-
-            const hashedPassword = await bcryptLib.hash(password)
-
-            const user = await signupUserDB(username, hashedPassword, email)
-
-            if (!user) {
-                const error = new Error("Erreur lors de la création du compte.")
-                error.statusCode = 500
-                throw error
-            }
-
-            return {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-            }
-        },
-        async validateCredentials({ username, password }) {
-            const user = await getUserByUsername(username);
-
-            if (!user) {
-                const error = new Error("Identifiants invalides.");
-                error.statusCode = 401;
-                throw error;
-            }
-
-            const isValidPassword = await bcryptLib.compare(password, user.password);
-            if (!isValidPassword) {
-                const error = new Error("Identifiants invalides.");
-                error.statusCode = 401;
-                throw error;
-            }
-            return {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                twoFAEnabled: user.twoFAEnabled,
-                twoFAMethod: user.twoFAMethod
-            };
-        },
-
-        async update({ id, username, password, email }) {
-            const user = await getUserById(id);
-                
-            if (!user) {
-                const error = new Error("Utilisateur non trouvé.");
-                error.statusCode = 404;
-                throw error;
-            }
-
-            const usernameTaken = await isUsernameTaken(username);
-            if (usernameTaken && user.username !== username) {
-                const error = new Error("Ce pseudo est déjà utilisé.");
-                error.statusCode = 409;
-                throw error;
-            }
-            const hashedPassword = await bcryptLib.hash(password);
-            const updatedUser = await updateUserDB(username, hashedPassword, email, id);
-
-            if (!updatedUser) {
-                const error = new Error("Erreur lors de la mise à jour de l'utilisateur.");
-                error.statusCode = 500;
-                throw error;
-            }
-
-            return {
-                id: updatedUser.id,
-                username: updatedUser.username,
-                email: updatedUser.email,
-            };
-        },
-
-        async getSecret(id)
-        {
-            return await getUserSecret(id);
-        },
-        async getById(id) {
-            return await getUserById(id);
-        },
-        async save2FASecret(id, secret) {
-            return await updateUser2FASecret(id, secret);
-        },
-        async enable2FA(id, method) {
-            await setUser2FAEnabled(id);
-            await set2FAMethod(method, id);
-            return ;
-        }
-
-    }
-}
+      async disableUserTwoFA(id) {
+        await disableUserTwoFA(id);
+      },
+  
+      async signup({ username, password, email, avatar}) {
+        throwIf(await checkUsernameExists(username), "Ce pseudo est déjà utilisé.", 409);
+        throwIf(await checkEmailExists(email), "Cet email est déjà enregistré.", 409);
+  
+        const hashedPassword = await bcryptLib.hash(password);
+        const user = await createUser(username, hashedPassword, email, avatar);
+  
+        throwIf(!user, "Erreur lors de la création du compte.", 500);
+  
+        return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+        };
+      },
+  
+      async validateCredentials({ username, password }) {
+        const user = await findUserByUsername(username);
+        throwIf(!user, "Identifiants invalides.", 401);
+  
+        const isValidPassword = await bcryptLib.compare(password, user.password);
+        throwIf(!isValidPassword, "Identifiants invalides.", 401);
+  
+        return {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          twoFAEnabled: user.twoFAEnabled,
+          twoFAMethod: user.twoFAMethod,
+        };
+      },
+  
+      async update({ id, username, password, email }) {
+        const user = await findUserById(id);
+        throwIf(!user, "Utilisateur non trouvé.", 404);
+  
+        const usernameTaken = await checkUsernameExists(username);
+        throwIf(usernameTaken && user.username !== username, "Ce pseudo est déjà utilisé.", 409);
+  
+        const hashedPassword = await bcryptLib.hash(password);
+        const updatedUser = await updateUserById(username, hashedPassword, email, id);
+  
+        throwIf(!updatedUser, "Erreur lors de la mise à jour de l'utilisateur.", 500);
+  
+        return {
+          id: updatedUser.id,
+          username: updatedUser.username,
+          email: updatedUser.email,
+        };
+      },
+  
+      async getSecret(id) {
+        return await findUserTwoFASecret(id);
+      },
+      async getById(id) {
+        return await findUserById(id);
+      },
+      async save2FASecret(id, secret) {
+        return await updateUserTwoFASecret(id, secret);
+      },
+      async enable2FA(id, method) {
+        await enableUserTwoFA(id);
+        await updateUserTwoFAMethod(method, id);
+      },
+      async saveTemp2FASecret(id, secret) {
+        return await updateUserTempTwoFASecret(id, secret);
+      },
+    };
+  }
+  

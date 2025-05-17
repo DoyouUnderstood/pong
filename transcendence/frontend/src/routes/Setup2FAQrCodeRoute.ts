@@ -1,5 +1,6 @@
 import { RouteI } from "../interfaces/RouteInterface";
-import { Api } from '../services/api.js';
+import { twoFAService } from '../services/twoFAService.js';
+
 export class Setup2FAQrCodeRoute implements RouteI
 {
     partial = "setup-2fa-qrcode.html"
@@ -7,9 +8,10 @@ export class Setup2FAQrCodeRoute implements RouteI
     async setup(container: HTMLElement): Promise<void>
     {
         try {
-        await this.handleQrCode(container); 
+        const blob = await twoFAService.setupQrCode();
+        await this.handleQrCode(container, blob);
         const digits = await this.getdigits(container);
-        const response = await this.VerifyCode(digits);
+        const response = await twoFAService.verifyQrCode(digits);
         this.displayMessage(container, response.message);
         } catch(err: any)
         {   
@@ -23,31 +25,18 @@ export class Setup2FAQrCodeRoute implements RouteI
         const messageDiv = container.querySelector("#response-message") as HTMLElement;
         messageDiv.textContent = message;
     }
-    private async VerifyCode(code: string): Promise<any>
-    {
-        const response = await Api.post('2fa/qr-code/verify', code);
-        return response.message;
-    }
-    private async handleQrCode(container: HTMLElement) {
-        try {
-               const response = await fetch("/api/2fa/qr-code/setup", {
-            method: "GET",
-            credentials: "include",
-        });
-            const blob = await response.blob();
-            console.log(blob);
+
+
+    private async handleQrCode(container: HTMLElement, blob: any) {
             const img = container.querySelector("#DisplayQr-code") as HTMLImageElement;
             if (img) {
                 img.src = URL.createObjectURL(blob);
                 img.classList.remove("invisible");
 
             }
-        } catch (error) {
-            console.error("Erreur lors de la récupération du QR code:", error);
-        }
     }
     
-        private async getdigits(container: HTMLElement): Promise<string> {
+    private async getdigits(container: HTMLElement): Promise<string> {
         return new Promise((resolve) => {
             const inputs = Array.from(container.querySelectorAll<HTMLInputElement>('input[data-2fa]'));
             const getCode = () => inputs.map(i => i.value).join('');
@@ -70,9 +59,6 @@ export class Setup2FAQrCodeRoute implements RouteI
                     }
                 });
             });
-
-
-
-                          });
+        });
     }
 }

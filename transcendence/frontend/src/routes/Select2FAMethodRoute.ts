@@ -19,7 +19,8 @@ export class Select2FAMethodRoute implements RouteI
         })
         const qrcodeMethod = container.querySelector("#twofaqr-code") as HTMLElement;
         qrcodeMethod.addEventListener("click", () => {
-            router.naviguate("setup-2fa-qrcode");
+            //router.naviguate("setup-2fa-qrcode");
+            return ;
         })
     }
  /*   

@@ -1,4 +1,4 @@
-import { Api } from '../services/api.js';
+import { twoFAService } from '../services/twoFAService.js';
 export class Setup2FAQrCodeRoute {
     constructor() {
         this.partial = "setup-2fa-qrcode.html";
@@ -6,9 +6,10 @@ export class Setup2FAQrCodeRoute {
     }
     async setup(container) {
         try {
-            await this.handleQrCode(container);
+            const blob = await twoFAService.setupQrCode();
+            await this.handleQrCode(container, blob);
             const digits = await this.getdigits(container);
-            const response = await this.VerifyCode(digits);
+            const response = await twoFAService.verifyQrCode(digits);
             this.displayMessage(container, response.message);
         }
         catch (err) {
@@ -20,26 +21,11 @@ export class Setup2FAQrCodeRoute {
         const messageDiv = container.querySelector("#response-message");
         messageDiv.textContent = message;
     }
-    async VerifyCode(code) {
-        const response = await Api.post('2fa/qr-code/verify', code);
-        return response.message;
-    }
-    async handleQrCode(container) {
-        try {
-            const response = await fetch("/api/2fa/qr-code/setup", {
-                method: "GET",
-                credentials: "include",
-            });
-            const blob = await response.blob();
-            console.log(blob);
-            const img = container.querySelector("#DisplayQr-code");
-            if (img) {
-                img.src = URL.createObjectURL(blob);
-                img.classList.remove("invisible");
-            }
-        }
-        catch (error) {
-            console.error("Erreur lors de la récupération du QR code:", error);
+    async handleQrCode(container, blob) {
+        const img = container.querySelector("#DisplayQr-code");
+        if (img) {
+            img.src = URL.createObjectURL(blob);
+            img.classList.remove("invisible");
         }
     }
     async getdigits(container) {

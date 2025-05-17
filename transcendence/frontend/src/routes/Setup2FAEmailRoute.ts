@@ -1,6 +1,5 @@
 import { RouteI } from "../interfaces/RouteInterface.js";
-import { AuthService } from '../services/authService.js';
-import { Api } from '../services/api.js';
+import { twoFAService } from '../services/twoFAService.js';
 
 export class Setup2FAEmailRoute implements RouteI
 {
@@ -58,22 +57,10 @@ async setup(container: HTMLElement): Promise<void> {
         });
     }
     private async sendEmail(container: HTMLElement) {
-        const user = AuthService.getCurrentUser();
-        await Api.post('2fa/mail/setup', user);
+        await twoFAService.setupEmail();
         const digits = await this.getdigits(container);
-        const response = await this.verifyDigits(digits);
+        const response = await twoFAService.verifyEmailCode(digits);
         this.displayMessage(container, response.message);
-    }
-
-    private async verifyDigits(code: string): Promise<any> {
-        const currentuser = AuthService.getCurrentUser();
-        const user = {
-            code: code,
-            user: currentuser,
-            twoFAMethod: "email"
-        };
-        const response = await Api.post('2fa/verify', user);
-        return response;
     }
 
 }

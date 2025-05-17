@@ -1,36 +1,14 @@
 import db from "../db/sqlite.js";
 import {executeInsert, execute, selectOne } from '../db/helpers.js';
 
-export async function getUserSecret(id)
-{
-    return await selectOne(db, `SELECT totpSecret from User WHERE id = ?`, [id]);
-}
-export async function updateUser2FASecret(id, secret) {
-    return await execute(db, `UPDATE User SET totpSecret = ? WHERE id = ?`, [secret, id]);
-}
-
-export async function setUser2FAEnabled(id) {
-    return await execute(db, `UPDATE User SET twofaEnabled = 1 WHERE id = ?`, [id]);
-}
-
-export async function set2FAMethod(method, id)
-{
-    return await execute(db, `UPDATE User SET twoFAMethod = ? WHERE id = ?`, [method, id]);
-}
-
-export async function getUser2FAMethod(id)
-{
-    return await selectOne(db, `SELECT twoFAMethod FROM User WHERE id = ?`, [id]);
-}
-
-export async function getUserById(id) {
+export async function findUserById(id) {
     return await selectOne(db,
         `SELECT * FROM User WHERE id = ?`,
         [id]
     )
 }
 
-export async function updateUserDB(username, password, email, id) {
+export async function updateUserById(username, password, email, id) {
     
     const result = await execute(db, 
         `UPDATE User SET username = ?, password = ?, email = ? WHERE id = ?`,
@@ -46,19 +24,19 @@ export async function updateUserDB(username, password, email, id) {
     );
 }
 
-export async function getUserByUsername(username) {
+export async function findUserByUsername(username) {
     return await selectOne(db,
         `SELECT * FROM User WHERE username = ?`,
         [username]
     )
 }
 
-export async function signupUserDB(username, password, email) 
+export async function createUser(username, password, email, avatar) 
 {
 
     const result = await executeInsert(db, 
-        `INSERT INTO User (username, password, email) VALUES(?, ?, ?)`,
-        [username, password, email]
+        `INSERT INTO User (username, password, email, avatar) VALUES(?, ?, ?, ?)`,
+        [username, password, email, avatar]
     );
 
     // On recupere l'user complet via l'id genere
@@ -68,7 +46,11 @@ export async function signupUserDB(username, password, email)
     );
 }
 
-export async function isEmailTaken(email)
+export async function findUserAvatar(id)
+{
+    return await selectOne(db, `SELECT avatar FROM User WHERE id = ?`, [id]);
+}
+export async function checkEmailExists(email)
 {
     const result = await selectOne(db, 
         `SELECT * FROM User WHERE email = ?`,
@@ -79,7 +61,7 @@ export async function isEmailTaken(email)
     return false;
 }
 
-export async function isUsernameTaken(username) {
+export async function checkUsernameExists(username) {
     const result = await selectOne(db, 
         `SELECT * FROM User WHERE username = ?`,
         [username]

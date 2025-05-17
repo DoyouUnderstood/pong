@@ -2,6 +2,7 @@ import { RouteI } from "../interfaces/RouteInterface.js";
 import { User } from "../models/User.js";
 import { AuthService } from "../services/authService.js";
 import { eventBus } from "../utils/EventBus.js";
+
 export class HomeRoute implements RouteI
 {
     partial = 'home.html';

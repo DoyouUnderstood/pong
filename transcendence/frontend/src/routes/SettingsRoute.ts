@@ -1,10 +1,11 @@
+
 import { User } from "../models/User.js";
 import { RouteI } from "../interfaces/RouteInterface.js";
-import { eventBus } from "../utils/EventBus.js";
+import { addBackButtonListener } from "../utils/EventBus.js";
 import { AuthService } from "../services/authService.js";
 import { Api } from "../services/api.js";
 import { router } from "../services/routeurService.js";
-
+import { twoFAService } from '../services/twoFAService.js';
 export class SettingsRoute implements RouteI {
     partial = "settings.html";
     authentification: "loginRequired" = "loginRequired";
@@ -13,39 +14,39 @@ export class SettingsRoute implements RouteI {
         this.formEvent(container);
         this.enable2fa(container);
     }
-    private async disable2fa(container: HTMLElement)
-    {
-        const twoFAStatus = await Api.get('2fa/status');
-        if (twoFAStatus.twoFAEnabled == true && twoFAStatus.twoFAMethod == "email")
-        {
-            return ;
-        } else if (twoFAStatus.twoFAEnabled == true && twoFAStatus.twoFAMethod == "qr-code")
-        {
-            return ;
-        }
 
-    }
     private async enable2fa(container: HTMLElement) {
-        const toggle = container.querySelector('input[type="checkbox"].peer') as HTMLInputElement | null;
+    const toggle = container.querySelector('input[type="checkbox"].peer') as HTMLInputElement | null;
+    if (!toggle) return;
 
-        if (!toggle) 
-            return;
-    
-        const response = await Api.get("2fa/status");
-        let isactivate: Boolean = response.twoFAEnabled;
-        if (isactivate == true)
-        {
-            console.log("checked");
-            toggle.checked = true;
+    // Toujours afficher la vraie valeur backend
+    await this.refreshToggleState(toggle);
+
+    toggle.addEventListener("change", async () => {
+        const visible = toggle.checked;
+
+        if (visible) {
+            // On NE coche pas ici !! On navigue
+            router.naviguate('select-2fa-method');
+        } else {
+            // Pareil : vérifier serveur
+            const status = await twoFAService.getStatus();
+            if (status.twoFAMethod === "email") {
+                router.naviguate('disable-2fa-email');
+            } else if (status.twoFAMethod === "qr-code") {
+                return ;
+                //router.naviguate('disable-2fa-qrcode');
+            } else {
+                console.error("Méthode 2FA inconnue.");
+            }
         }
-        toggle.addEventListener("change", () => {
-            const visible = toggle.checked;
-            if (visible)
-                router.naviguate('select-2fa-method');
-      //      else 
-        //        this.disable2fa(container: HTMLElement);
-        });
-    }
+    });
+}
+
+private async refreshToggleState(toggle: HTMLInputElement) {
+    const response = await twoFAService.getStatus();
+    toggle.checked = response.twoFAEnabled; // toggle est mis à jour en fonction du serveur
+}
 
     private formEvent(container: HTMLElement) {
         const form = container.querySelector("form");

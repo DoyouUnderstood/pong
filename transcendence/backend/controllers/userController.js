@@ -60,10 +60,10 @@ export async function connectUser(request, reply, authService) {
 
 export async function signupUser(request, reply, userService)
 {
-    const { username, password, email } = request.body;
-    console.log("voici les infos:", username, password, email);
+    const { username, password, email, avatar} = request.body;
+    console.log("voici les infos:", username, password, email, avatar);
     try {
-        const user = await userService.signup({ username, password, email })
+        const user = await userService.signup({ username, password, email, avatar })
         console.log("voici le user: ", user);
         reply.send({
             status: 200,

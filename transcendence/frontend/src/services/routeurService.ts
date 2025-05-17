@@ -1,5 +1,6 @@
 import { RouteI } from "../interfaces/RouteInterface.js";
 import { loadService } from "../services/loadService.js";
+import { addBackButtonListener } from "../utils/EventBus.js";
 
 import { AuthService } from "./authService.js"; // needed for route guards
 
@@ -66,6 +67,7 @@ export class RouterService {
     this.#currentRoute?.cleanup?.();
     if (this.#container) {
         this.#container.innerHTML = html;
+         addBackButtonListener(); // ⚡ tout de suite après injection HTML
         await route.setup(this.#container);
     }
 

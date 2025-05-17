@@ -86,7 +86,8 @@ export class Select2FAMethodRoute {
         });
         const qrcodeMethod = container.querySelector("#twofaqr-code");
         qrcodeMethod.addEventListener("click", () => {
-            router.naviguate("setup-2fa-qrcode");
+            //router.naviguate("setup-2fa-qrcode");
+            return;
         });
     }
 }

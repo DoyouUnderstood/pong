@@ -1,3 +1,12 @@
+export function addBackButtonListener() {
+    const backButton = document.getElementById("back-button");
+    if (backButton && !backButton.hasAttribute("data-bound")) {
+        backButton.setAttribute("data-bound", "true"); // évite le double binding
+        backButton.addEventListener("click", () => {
+            window.history.back();
+        });
+    }
+}
 export class EventBus {
     constructor() {
         this.subscribers = {};

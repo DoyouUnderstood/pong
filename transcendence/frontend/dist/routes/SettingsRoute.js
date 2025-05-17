@@ -1,7 +1,7 @@
 import { User } from "../models/User.js";
 import { AuthService } from "../services/authService.js";
-import { Api } from "../services/api.js";
 import { router } from "../services/routeurService.js";
+import { twoFAService } from '../services/twoFAService.js';
 export class SettingsRoute {
     constructor() {
         this.partial = "settings.html";
@@ -11,32 +11,37 @@ export class SettingsRoute {
         this.formEvent(container);
         this.enable2fa(container);
     }
-    async disable2fa(container) {
-        const twoFAStatus = await Api.get('2fa/status');
-        if (twoFAStatus.twoFAEnabled == true && twoFAStatus.twoFAMethod == "email") {
-            return;
-        }
-        else if (twoFAStatus.twoFAEnabled == true && twoFAStatus.twoFAMethod == "qr-code") {
-            return;
-        }
-    }
     async enable2fa(container) {
         const toggle = container.querySelector('input[type="checkbox"].peer');
         if (!toggle)
             return;
-        const response = await Api.get("2fa/status");
-        let isactivate = response.twoFAEnabled;
-        if (isactivate == true) {
-            console.log("checked");
-            toggle.checked = true;
-        }
-        toggle.addEventListener("change", () => {
+        // Toujours afficher la vraie valeur backend
+        await this.refreshToggleState(toggle);
+        toggle.addEventListener("change", async () => {
             const visible = toggle.checked;
-            if (visible)
+            if (visible) {
+                // On NE coche pas ici !! On navigue
                 router.naviguate('select-2fa-method');
-            //      else 
-            //        this.disable2fa(container: HTMLElement);
+            }
+            else {
+                // Pareil : vérifier serveur
+                const status = await twoFAService.getStatus();
+                if (status.twoFAMethod === "email") {
+                    router.naviguate('disable-2fa-email');
+                }
+                else if (status.twoFAMethod === "qr-code") {
+                    return;
+                    //router.naviguate('disable-2fa-qrcode');
+                }
+                else {
+                    console.error("Méthode 2FA inconnue.");
+                }
+            }
         });
+    }
+    async refreshToggleState(toggle) {
+        const response = await twoFAService.getStatus();
+        toggle.checked = response.twoFAEnabled; // toggle est mis à jour en fonction du serveur
     }
     formEvent(container) {
         const form = container.querySelector("form");

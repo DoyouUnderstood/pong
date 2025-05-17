@@ -13,7 +13,14 @@ export default function twoFAServiceFactory() {
         token,
         window: 1,
       });
-    }
+    },
+generateOtpauthUrl(username, secretBase32) {
+  return speakeasy.otpauthURL({
+    secret: secretBase32,
+    encoding: 'base32',
+    label: `PingPong (${username})`
+  });
+}
   };
 }
 

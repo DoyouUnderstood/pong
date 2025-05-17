@@ -7,6 +7,8 @@ import { DashboardRoute } from "./routes/DashboardRoute.js";
 import { Select2FAMethodRoute } from "./routes/Select2FAMethodRoute.js";
 import { Setup2FAEmailRoute } from "./routes/Setup2FAEmailRoute.js";
 import { Setup2FAQrCodeRoute } from "./routes/Setup2FAQrCodeRoute.js";
+import { Disable2FAQrCodeRoute } from "./routes/Disable2FAQrCodeRoute.js";
+import { Disable2FAEmailRoute } from "./routes/Disable2FAEmailRoute.js";
 
 router.addRoute('home', new HomeRoute());
 router.addRoute('login', new LoginRoute());
@@ -16,5 +18,7 @@ router.addRoute('dashboard', new DashboardRoute());
 router.addRoute('select-2fa-method', new Select2FAMethodRoute());
 router.addRoute('setup-2fa-email', new Setup2FAEmailRoute());
 router.addRoute('setup-2fa-qrcode', new Setup2FAQrCodeRoute());
+router.addRoute('disable-2fa-qrcode', new Disable2FAQrCodeRoute());
+router.addRoute('disable-2fa-email', new Disable2FAEmailRoute());
 router.setup(document.getElementById('app')!);
 await router.start();

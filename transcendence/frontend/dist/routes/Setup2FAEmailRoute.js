@@ -1,5 +1,4 @@
-import { AuthService } from '../services/authService.js';
-import { Api } from '../services/api.js';
+import { twoFAService } from '../services/twoFAService.js';
 export class Setup2FAEmailRoute {
     constructor() {
         this.partial = 'setup-2fa-email.html';
@@ -51,20 +50,9 @@ export class Setup2FAEmailRoute {
         });
     }
     async sendEmail(container) {
-        const user = AuthService.getCurrentUser();
-        await Api.post('2fa/mail/setup', user);
+        await twoFAService.setupEmail();
         const digits = await this.getdigits(container);
-        const response = await this.verifyDigits(digits);
+        const response = await twoFAService.verifyEmailCode(digits);
         this.displayMessage(container, response.message);
-    }
-    async verifyDigits(code) {
-        const currentuser = AuthService.getCurrentUser();
-        const user = {
-            code: code,
-            user: currentuser,
-            twoFAMethod: "email"
-        };
-        const response = await Api.post('2fa/verify', user);
-        return response;
     }
 }

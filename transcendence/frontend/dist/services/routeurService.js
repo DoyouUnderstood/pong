@@ -11,6 +11,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _RouterService_routes, _RouterService_container, _RouterService_currentRoute, _RouterService_currentPath;
 import { loadService } from "../services/loadService.js";
+import { addBackButtonListener } from "../utils/EventBus.js";
 import { AuthService } from "./authService.js"; // needed for route guards
 export class RouterService {
     constructor() {
@@ -66,6 +67,7 @@ export class RouterService {
         __classPrivateFieldGet(this, _RouterService_currentRoute, "f")?.cleanup?.();
         if (__classPrivateFieldGet(this, _RouterService_container, "f")) {
             __classPrivateFieldGet(this, _RouterService_container, "f").innerHTML = html;
+            addBackButtonListener(); // ⚡ tout de suite après injection HTML
             await route.setup(__classPrivateFieldGet(this, _RouterService_container, "f"));
         }
         __classPrivateFieldSet(this, _RouterService_currentRoute, route, "f");
